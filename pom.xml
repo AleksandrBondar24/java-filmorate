@@ -14,7 +14,8 @@
 	<name>filmorate</name>
 	<description>Поиск фильмов по рейтингу</description>
 	<properties>
-		<maven.compiler.release>11</maven.compiler.release>
+		<java.version>17</java.version>
+		<maven.compiler.release>17</maven.compiler.release>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
@@ -46,6 +47,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.10.1</version>
 			</plugin>
 		</plugins>
 	</build>
