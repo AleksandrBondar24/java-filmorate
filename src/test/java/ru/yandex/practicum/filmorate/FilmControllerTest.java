@@ -32,7 +32,7 @@ public class FilmControllerTest {
     @Test
     public void shouldCheckIdFilm() {
         ResponseEntity<Film> response = controller.createFilm(film);
-        int id = Objects.requireNonNull(response.getBody()).getId();
+        Long id = Objects.requireNonNull(response.getBody()).getId();
 
         Assertions.assertEquals(1, id);
 
@@ -41,13 +41,13 @@ public class FilmControllerTest {
 
         Assertions.assertEquals(200, status);
 
-        film.setId(999);
+        film.setId(999L);
         ResponseEntity<Film> response2 = controller.updateFilm(film);
         int status1 = response2.getStatusCode().value();
 
         Assertions.assertEquals(404, status1);
 
-        film.setId(0);
+        film.setId(0L);
         ResponseEntity<Film> response3 = controller.updateFilm(film);
         int status2 = response3.getStatusCode().value();
 
@@ -75,7 +75,7 @@ public class FilmControllerTest {
         Assertions.assertEquals(400, status2);
 
         Film film1 = new Film();
-        film1.setId(1);
+        film1.setId(1L);
         film1.setName("Wither");
         film1.setDescription("fantasy");
         LocalDate localDate = LocalDate.of(2020, 12, 20);
@@ -87,7 +87,7 @@ public class FilmControllerTest {
         Assertions.assertEquals(200, status3);
 
         Film film2 = new Film();
-        film2.setId(1);
+        film2.setId(1L);
         film2.setName("Wither");
         film2.setDescription("fantasy");
         film2.setReleaseDate(data);
@@ -98,7 +98,7 @@ public class FilmControllerTest {
         Assertions.assertEquals(404, status4);
 
         Film film3 = new Film();
-        film3.setId(1);
+        film3.setId(1L);
         film3.setName("Wither");
         film3.setDescription("fantasy");
         LocalDate localDate2 = LocalDate.of(1801, 12, 20);

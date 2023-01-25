@@ -19,19 +19,17 @@ import java.util.Map;
 @Slf4j
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
     public static final LocalDate data = LocalDate.of(1895, 12, 28);
-    private int generatorIdFilm = 1;
+    private Long generatorIdFilm = 1L;
 
     @PostMapping
     public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film) {
         try {
-            if (film.getReleaseDate().isBefore(data) || film.getReleaseDate().isEqual(data)) {
-                throw new ValidationException("Ошибка валидации данных.");
-            }
+            releaseDateValidation(film);
             film.setId(generatorIdFilm);
             films.put(film.getId(), film);
-            log.debug("Добавлен фильм: " + film.getName());
+            log.debug("Добавлен фильм: " + film);
             generatorIdFilm++;
             return ResponseEntity.ok(film);
         } catch (ValidationException e) {
@@ -43,15 +41,10 @@ public class FilmController {
     @PutMapping
     public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film film) {
         try {
-            if (film.getId() == 0 ||
-                    !films.containsKey(film.getId()) ||
-                    film.getReleaseDate().isBefore(data) ||
-                    film.getReleaseDate().isEqual(data)) {
-                throw new ValidationException("Ошибка валидации данных.");
-            }
-
+            idValidation(film);
+            releaseDateValidation(film);
             films.put(film.getId(), film);
-            log.debug("Обновлен фильм: " + film.getName());
+            log.debug("Обновлен фильм: " + film);
             return ResponseEntity.ok(film);
         } catch (ValidationException e) {
             log.debug(e.getMessage(), e);
@@ -60,9 +53,20 @@ public class FilmController {
     }
 
     @GetMapping
-    @ResponseBody
     public ResponseEntity<ArrayList<Film>> getFilms() {
         return ResponseEntity.ok(new ArrayList<>(films.values()));
+    }
+
+    private void idValidation(Film film) {
+        if (film.getId() == 0 || !films.containsKey(film.getId())) {
+            throw new ValidationException("Ошибка валидации данных.");
+        }
+    }
+
+    private void releaseDateValidation(Film film) {
+        if (film.getReleaseDate().isBefore(data) || film.getReleaseDate().isEqual(data)) {
+            throw new ValidationException("Ошибка валидации данных.");
+        }
     }
 }
 

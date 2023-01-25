@@ -28,7 +28,7 @@ public class UserControllerTest {
     @Test
     public void shouldCheckIdUser() {
         ResponseEntity<User> response = controller.createUser(user);
-        int id = Objects.requireNonNull(response.getBody()).getId();
+        Long id = Objects.requireNonNull(response.getBody()).getId();
 
         Assertions.assertEquals(1, id);
 
@@ -37,13 +37,13 @@ public class UserControllerTest {
 
         Assertions.assertEquals(200, status);
 
-        user.setId(999);
+        user.setId(999L);
         ResponseEntity<User> response2 = controller.updateUser(user);
         int status1 = response2.getStatusCode().value();
 
         Assertions.assertEquals(404, status1);
 
-        user.setId(0);
+        user.setId(0L);
         ResponseEntity<User> response3 = controller.updateUser(user);
         int status2 = response3.getStatusCode().value();
 
@@ -68,7 +68,7 @@ public class UserControllerTest {
         Assertions.assertEquals("beglets", name1);
 
         User user3 = new User();
-        user3.setId(2);
+        user3.setId(2L);
         user3.setEmail("alex@yandex.ru");
         user3.setLogin("beglets");
         LocalDate localDate1 = LocalDate.of(1985, 4, 24);
