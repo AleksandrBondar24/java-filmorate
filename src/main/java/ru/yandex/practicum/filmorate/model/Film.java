@@ -7,8 +7,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
