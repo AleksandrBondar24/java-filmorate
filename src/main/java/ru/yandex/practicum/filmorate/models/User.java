@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.models;
 
 import lombok.*;
 
@@ -13,8 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class User {
-    private Long id;
+public class User extends Model{
     @Email
     @NotBlank
     private String email;

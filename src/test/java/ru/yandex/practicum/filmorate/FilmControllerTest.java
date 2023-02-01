@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.controllers.FilmController;
+import ru.yandex.practicum.filmorate.models.Film;
 
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-import static ru.yandex.practicum.filmorate.controller.FilmController.data;
+import static ru.yandex.practicum.filmorate.controllers.FilmController.data;
 
 public class FilmControllerTest {
 
@@ -72,7 +72,7 @@ public class FilmControllerTest {
         ResponseEntity<Film> response2 = controller.createFilm(film);
         int status2 = response2.getStatusCode().value();
 
-        Assertions.assertEquals(400, status2);
+        Assertions.assertEquals(200, status2);
 
         Film film1 = new Film();
         film1.setId(1L);
@@ -95,7 +95,7 @@ public class FilmControllerTest {
         ResponseEntity<Film> response4 = controller.updateFilm(film2);
         int status4 = response4.getStatusCode().value();
 
-        Assertions.assertEquals(404, status4);
+        Assertions.assertEquals(200, status4);
 
         Film film3 = new Film();
         film3.setId(1L);
@@ -107,7 +107,7 @@ public class FilmControllerTest {
         ResponseEntity<Film> response5 = controller.updateFilm(film3);
         int status5 = response5.getStatusCode().value();
 
-        Assertions.assertEquals(404, status5);
+        Assertions.assertEquals(400, status5);
     }
 }
 

@@ -1,12 +1,15 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
+
+import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.util.NotFoundException;
+import ru.yandex.practicum.filmorate.util.ValidationException;
+import ru.yandex.practicum.filmorate.models.Film;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -21,16 +24,16 @@ import java.util.Map;
 public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
     public static final LocalDate data = LocalDate.of(1895, 12, 28);
-    private Long generatorIdFilm = 1L;
+    private Long generatorId = 1L;
 
     @PostMapping
     public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film) {
         try {
             releaseDateValidation(film);
-            film.setId(generatorIdFilm);
+            film.setId(generatorId);
             films.put(film.getId(), film);
             log.debug("Добавлен фильм: " + film);
-            generatorIdFilm++;
+            generatorId++;
             return ResponseEntity.ok(film);
         } catch (ValidationException e) {
             log.debug(e.getMessage(), e);
@@ -46,9 +49,12 @@ public class FilmController {
             films.put(film.getId(), film);
             log.debug("Обновлен фильм: " + film);
             return ResponseEntity.ok(film);
-        } catch (ValidationException e) {
+        } catch (NotFoundException  e) {
             log.debug(e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(film);
+        } catch (ValidationException e) {
+            log.debug(e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(film);
         }
     }
 
@@ -59,14 +65,17 @@ public class FilmController {
 
     private void idValidation(Film film) {
         if (film.getId() == 0 || !films.containsKey(film.getId())) {
-            throw new ValidationException("Ошибка валидации данных.");
+            throw new NotFoundException();
         }
     }
 
     private void releaseDateValidation(Film film) {
-        if (film.getReleaseDate().isBefore(data) || film.getReleaseDate().isEqual(data)) {
-            throw new ValidationException("Ошибка валидации данных.");
+        if (film.getReleaseDate().isBefore(data)) {
+            throw new ValidationException("Ошибка валидации");
         }
     }
 }
+
+
+
 
