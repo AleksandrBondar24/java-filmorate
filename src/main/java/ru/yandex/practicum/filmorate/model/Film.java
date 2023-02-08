@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.models;
+package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
@@ -6,12 +6,14 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class Film extends Model{
     @NotBlank
@@ -21,4 +23,5 @@ public class Film extends Model{
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+    private Set<Long> likes = new HashSet<>();
 }
