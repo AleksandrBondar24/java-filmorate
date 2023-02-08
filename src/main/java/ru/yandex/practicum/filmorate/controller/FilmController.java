@@ -6,71 +6,54 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
 @RequestMapping("/films")
 @RestController
 @RequiredArgsConstructor
-public class FilmController extends Controller<Film> {
-    public static final LocalDate data = LocalDate.of(1895, 12, 28);
+public class FilmController {
     private final FilmService service;
 
     @PostMapping
-    @Override
     public Film create(@Valid @RequestBody Film film, BindingResult result) {
-        service.save(super.create(film, result));
-        log.debug("Добавлен фильм: {}", film);
-        return film;
+        Film film1 = service.save(film, result);
+        log.debug("Добавлен фильм: {}", film1);
+        return film1;
     }
 
     @PutMapping
-    @Override
     public Film update(@Valid @RequestBody Film film) {
-        service.update(super.update(film));
-        log.debug("Обновлен фильм: {}", film);
-        return film;
+        Film film1 = service.update(film);
+        log.debug("Обновлен фильм: {}", film1);
+        return film1;
     }
 
     @PutMapping("/{id}/like/{userId}")
-    @Override
     protected void add(@PathVariable Long id, @PathVariable Long userId) {
-        service.saveLike(id, userId);
+        service.add(id, userId);
         log.debug("Пользователь с идентификатором: " + userId + " поставил лайк фильму: " + id);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    @Override
     protected void delete(@PathVariable Long id, @PathVariable Long userId) {
-        service.deleteLike(id, userId);
+        service.delete(id, userId);
         log.debug("Пользователь с идентификатором: " + userId + " удалил свой лайк фильму: " + id);
     }
 
     @GetMapping("/popular")
-    @Override
     protected List<Film> getList(@RequestParam(value = "count", defaultValue = "10", required = false) Long count) {
         log.debug("Получен список из " + count + " лучших фильмов.");
-        return service.getFilmsBest(count);
+        return service.getList(count);
     }
 
     @GetMapping
-    @Override
     public List<Film> getListModels() {
-        log.debug("Получен список фильмов: {} ", service.getFilms());
-        return service.getFilms();
-    }
-
-
-    @Override
-    protected void validate(Film film) {
-        if (film.getReleaseDate().isBefore(data)) {
-            throw new ValidationException("Дата релиза фильма не должна быть раньше 1985.12.28");
-        }
+        log.debug("Получен список фильмов: {} ", service.getListModels());
+        return service.getListModels();
     }
 
     @GetMapping("/{id}")

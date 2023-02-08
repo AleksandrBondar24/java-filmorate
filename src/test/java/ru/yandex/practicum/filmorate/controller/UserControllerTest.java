@@ -12,11 +12,13 @@ import java.time.LocalDate;
 
 public class UserControllerTest {
     private UserController controller;
+    private UserStorage storage;
+    private UserService service;
     private User user;
     @BeforeEach
     public void createUserAndController() {
-        UserStorage storage = new InMemoryUserStorage();
-        UserService service = new UserService(storage);
+        storage = new InMemoryUserStorage();
+        service = new UserService(storage);
         controller = new UserController(service);
         user = new User();
         user.setEmail("alex@yandex.ru");
@@ -28,7 +30,7 @@ public class UserControllerTest {
 
     @Test
     public void shouldValidateUserOk() {
-        controller.validate(user);
+        service.validate(user);
 
         Assertions.assertEquals("Aleksandr",user.getName());
     }
@@ -36,14 +38,14 @@ public class UserControllerTest {
     @Test
     public void shouldValidateUserNameNull() {
         user.setName(null);
-        controller.validate(user);
+        service.validate(user);
 
         Assertions.assertEquals("beglets", user.getName());
     }
     @Test
     public void shouldValidateUserNameBlank() {
         user.setName(" ");
-        controller.validate(user);
+        service.validate(user);
 
         Assertions.assertEquals("beglets", user.getName());
     }

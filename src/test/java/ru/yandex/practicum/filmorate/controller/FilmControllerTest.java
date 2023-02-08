@@ -14,19 +14,22 @@ import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static ru.yandex.practicum.filmorate.controller.FilmController.data;
+import static ru.yandex.practicum.filmorate.service.FilmService.data;
 
 
 public class FilmControllerTest {
 
     private FilmController controller;
     private Film film;
+    private FilmStorage storage;
+    private UserStorage storageUser;
+    private FilmService service;
 
     @BeforeEach
     public void createFilmAndController() {
-        FilmStorage storage = new InMemoryFilmStorage();
-        UserStorage storageUser = new InMemoryUserStorage();
-        FilmService service = new FilmService(storage, storageUser);
+        storage = new InMemoryFilmStorage();
+        storageUser = new InMemoryUserStorage();
+        service = new FilmService(storage, storageUser);
         controller = new FilmController(service);
         film = new Film();
         film.setName("Wither");
@@ -38,18 +41,18 @@ public class FilmControllerTest {
 
     @Test
     public void shouldValidateFilmOk() {
-        controller.validate(film);
+        service.validate(film);
         film.setReleaseDate(data);
-        controller.validate(film);
+        service.validate(film);
     }
 
     @Test
     public void shouldValidateFilmFail() {
         LocalDate localDate = LocalDate.of(1800, 12, 20);
         film.setReleaseDate(localDate);
-        Exception exception = assertThrows(ValidationException.class, ()->controller.validate(film));
+        Exception exception = assertThrows(ValidationException.class, ()->service.validate(film));
 
-        Assertions.assertEquals("Ошибка валидации", exception.getMessage());
+        Assertions.assertEquals("Дата релиза фильма не должна быть раньше 1985.12.28", exception.getMessage());
     }
  }
 
