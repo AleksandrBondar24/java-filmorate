@@ -18,46 +18,47 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService extends AbstractService<Film> {
     public static final LocalDate data = LocalDate.of(1895, 12, 28);
-    private final FilmStorage storage;
-    private final UserStorage storageUser;
+    private final FilmStorage storageFilm;
 
     @Override
-    public void add(Long id, Long userId) {
-        super.add(id, userId);
-        storage.getFilm(id).getLikes().add(storageUser.getUser(userId).getId());
+    public void add(Long idFilm, Long userId) {
+        super.add(idFilm, userId);
+        storageFilm.getFilm(idFilm).getLikes().add(userId);
+        storageFilm.getFilm(idFilm).setRating(storageFilm.getFilm(idFilm).getLikes().size());
     }
 
     @Override
-    public void delete(Long id, Long userId) {
-        super.delete(id, userId);
-        storage.getFilm(id).getLikes().remove(storageUser.getUser(userId).getId());
+    public void delete(Long idFilm, Long userId) {
+        super.delete(idFilm, userId);
+        storageFilm.getFilm(idFilm).getLikes().remove(userId);
+        storageFilm.getFilm(idFilm).setRating(storageFilm.getFilm(idFilm).getLikes().size());
     }
 
-    public List<Film> getList(Long count) {
+    public List<Film> getListFilmBest(Long count) {
         super.validateId(count);
-        List<Film> list = storage.getFilms().stream().sorted(Comparator.comparingInt(film -> film.getLikes().size())).
+        return storageFilm.getFilms().stream().
+                sorted(Comparator.comparingInt(Film::getRating).reversed()).
+                limit(count).
                 collect(Collectors.toList());
-        Collections.reverse(list);
-        return list.stream().limit(count).collect(Collectors.toList());
     }
 
     @Override
     public Film save(Film film, BindingResult result) {
-        return storage.save(super.save(film, result));
+        return storageFilm.save(super.save(film, result));
     }
 
     @Override
     public Film update(Film film) {
-        return storage.update(super.update(film));
+        return storageFilm.update(super.update(film));
     }
 
-    public List<Film> getListModels() {
-        return storage.getFilms();
+    public List<Film> getListAllFilms() {
+        return storageFilm.getFilms();
     }
 
     public Film getFilm(Long id) {
         super.validateId(id);
-        return storage.getFilm(id);
+        return storageFilm.getFilm(id);
     }
 
     @Override

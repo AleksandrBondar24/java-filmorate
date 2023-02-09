@@ -16,30 +16,34 @@ public class UserService extends AbstractService<User> {
     private final UserStorage storage;
 
     @Override
-    public void add(Long id, Long friendId) {
-        super.add(id, friendId);
-        storage.getUser(id).getFriends().add(friendId);
-        storage.getUser(friendId).getFriends().add(id);
+    public void add(Long idUser, Long friendId) {
+        super.add(idUser, friendId);
+        storage.getUser(idUser).getFriends().add(friendId);
+        storage.getUser(friendId).getFriends().add(idUser);
     }
 
     @Override
-    public void delete(Long id, Long friendId) {
-        super.delete(id, friendId);
-        storage.getUser(id).getFriends().remove(friendId);
-        storage.getUser(friendId).getFriends().remove(id);
+    public void delete(Long idUser, Long friendId) {
+        super.delete(idUser, friendId);
+        storage.getUser(idUser).getFriends().remove(friendId);
+        storage.getUser(friendId).getFriends().remove(idUser);
     }
 
-    @Override
-    public List<User> getList(Long id) {
+
+    public List<User> getListFriends(Long id) {
         super.validateId(id);
-        return storage.getUser(id).getFriends().stream().map(storage::getUser).collect(Collectors.toList());
+        return storage.getUser(id).getFriends().stream().
+                map(storage::getUser).
+                collect(Collectors.toList());
     }
 
-    public List<User> getMutualFriends(Long id, Long otherId) {
-        super.validateIds(id,otherId);
-        Set<Long> friends = storage.getUser(id).getFriends();
-        return storage.getUser(otherId).getFriends().stream().filter(friends::contains).
-                map(storage::getUser).collect(Collectors.toList());
+    public List<User> getMutualFriends(Long idUser, Long otherId) {
+        super.validateIds(idUser, otherId);
+        Set<Long> friends = storage.getUser(idUser).getFriends();
+        return storage.getUser(otherId).getFriends().stream().
+                filter(friends::contains).
+                map(storage::getUser).
+                collect(Collectors.toList());
     }
 
     public User getUser(Long id) {
@@ -57,8 +61,8 @@ public class UserService extends AbstractService<User> {
         return storage.update(super.update(user));
     }
 
-    @Override
-    public List<User> getListModels() {
+
+    public List<User> getListAllUsers() {
         return storage.getUsers();
     }
 

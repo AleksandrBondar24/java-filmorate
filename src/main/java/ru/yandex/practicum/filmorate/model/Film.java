@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -15,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class Film extends Model{
+public class Film extends Model {
     @NotBlank
     private String name;
     @Size(max = 200)
@@ -23,5 +24,8 @@ public class Film extends Model{
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+    @JsonIgnore
     private Set<Long> likes = new HashSet<>();
+    @JsonIgnore
+    private int rating;
 }

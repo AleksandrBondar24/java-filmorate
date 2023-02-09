@@ -24,22 +24,18 @@ public abstract class AbstractService<T extends Model> {
         return o;
     }
 
-    protected void add(Long id, Long id1) {
-        validateIds(id, id1);
+    protected void add(Long id, Long otherId) {
+        validateIds(id, otherId);
     }
 
-    protected void delete(Long id, Long id1) {
-        validateIds(id, id1);
+    protected void delete(Long id, Long otherId) {
+        validateIds(id, otherId);
     }
-
-    protected abstract List<T> getList(Long id);
-
-    protected abstract List<T> getListModels();
 
     protected abstract void validate(T o);
 
-    protected void validateIds(Long id, Long id1) {
-        if (id <= 0 || id1 <= 0) {
+    protected void validateIds(Long id, Long otherId) {
+        if (id <= 0 || otherId <= 0) {
             throw new NotFoundException("Идентификатор должен быть положительным числом.");
         }
     }

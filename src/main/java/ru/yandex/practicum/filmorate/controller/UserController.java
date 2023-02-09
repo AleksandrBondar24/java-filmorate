@@ -33,8 +33,8 @@ public class UserController {
 
     @GetMapping
     public List<User> getListModels() {
-        log.debug("Получен список пользователей: {} ", service.getListModels());
-        return service.getListModels();
+        log.debug("Получен список пользователей: {} ", service.getListAllUsers());
+        return service.getListAllUsers();
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -52,7 +52,7 @@ public class UserController {
     @GetMapping("/{id}/friends")
     protected List<User> getList(@PathVariable Long id) {
         log.debug("Получен список друзей пользователя с идентификатором: " + id);
-        return service.getList(id);
+        return service.getListFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")

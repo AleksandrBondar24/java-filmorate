@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.Email;
@@ -15,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class User extends Model{
+public class User extends Model {
     @Email
     @NotBlank
     private String email;
@@ -24,5 +25,6 @@ public class User extends Model{
     private String name;
     @Past
     private LocalDate birthday;
+    @JsonIgnore
     private Set<Long> friends = new HashSet<>();
 }

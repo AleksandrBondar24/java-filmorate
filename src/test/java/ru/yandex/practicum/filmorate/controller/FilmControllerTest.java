@@ -22,14 +22,12 @@ public class FilmControllerTest {
     private FilmController controller;
     private Film film;
     private FilmStorage storage;
-    private UserStorage storageUser;
     private FilmService service;
 
     @BeforeEach
     public void createFilmAndController() {
         storage = new InMemoryFilmStorage();
-        storageUser = new InMemoryUserStorage();
-        service = new FilmService(storage, storageUser);
+        service = new FilmService(storage);
         controller = new FilmController(service);
         film = new Film();
         film.setName("Wither");
