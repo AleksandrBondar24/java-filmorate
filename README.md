@@ -1,3 +1,3 @@
 # java-filmorate
 Template repository for Filmorate project.
-![Untitled (3)](https://user-images.githubusercontent.com/113029158/220459366-582e5a4e-8a6b-48f2-84f4-8e7da9a68d46.png)
+![Untitled (4)](https://user-images.githubusercontent.com/113029158/220621875-62cfa78d-0b50-448c-ab9b-aa96f5b97186.png)
