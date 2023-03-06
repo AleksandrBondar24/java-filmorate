@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,50 +21,67 @@ public class FilmService extends AbstractService<Film> {
     private final FilmStorage storageFilm;
 
     @Override
-    public void add(Long idFilm, Long userId) {
-        super.add(idFilm, userId);
-        storageFilm.getFilm(idFilm).getLikes().add(userId);
-        storageFilm.getFilm(idFilm).setRating(storageFilm.getFilm(idFilm).getLikes().size());
+    public void add(Long filmId, Long userId) {
+        super.add(filmId, userId);
+        storageFilm.addLikes(filmId, userId);
     }
 
     @Override
-    public void delete(Long idFilm, Long userId) {
-        super.delete(idFilm, userId);
-        storageFilm.getFilm(idFilm).getLikes().remove(userId);
-        storageFilm.getFilm(idFilm).setRating(storageFilm.getFilm(idFilm).getLikes().size());
+    public void delete(Long filmId, Long userId) {
+        super.delete(filmId, userId);
+        storageFilm.deleteLikes(filmId, userId);
     }
 
     public List<Film> getListFilmBest(Long count) {
         super.validateId(count);
         return storageFilm.getFilms().stream().
-                sorted(Comparator.comparingInt(Film::getRating).reversed()).
+                sorted(Comparator.comparingInt(Film::getRate).
+                        reversed()).
                 limit(count).
                 collect(Collectors.toList());
     }
 
     @Override
     public Film save(Film film, BindingResult result) {
-        return storageFilm.save(super.save(film, result));
+        long id = storageFilm.save(super.save(film, result));
+        return storageFilm.getFilm(id);
     }
 
     @Override
     public Film update(Film film) {
-        return storageFilm.update(super.update(film));
+        return storageFilm.update(film);
     }
 
     public List<Film> getListAllFilms() {
         return storageFilm.getFilms();
     }
 
-    public Film getFilm(Long id) {
-        super.validateId(id);
-        return storageFilm.getFilm(id);
+    public Film getFilm(Long filmID) {
+        super.validateId(filmID);
+        return storageFilm.getFilm(filmID);
     }
 
     @Override
     public void validate(Film film) {
         if (film.getReleaseDate().isBefore(data)) {
-            throw new ValidationException("Дата релиза фильма не должна быть раньше 1985.12.28");
+            throw new ValidationException("Дата релиза фильма не должна быть раньше 1895.12.28");
         }
+    }
+
+    public List<FilmGenre> getFilmGenres() {
+        return storageFilm.getFilmGenres();
+    }
+
+    public FilmGenre getFilmGenre(Integer genreID) {
+        return storageFilm.getFilmGenre(genreID);
+
+    }
+
+    public List<Mpa> getMpaRatings() {
+        return storageFilm.getMpaRatings();
+    }
+
+    public Mpa getMpaRating(Integer mpaId) {
+        return storageFilm.getMpaRating(mpaId);
     }
 }
