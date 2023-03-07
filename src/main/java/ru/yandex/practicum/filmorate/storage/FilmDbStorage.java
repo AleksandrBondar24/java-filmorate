@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -10,10 +11,10 @@ import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.util.exception.NotFoundException;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -23,13 +24,14 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public long save(Film film) {
+    public Film save(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILM")
                 .usingGeneratedKeyColumns("film_id");
         long id = simpleJdbcInsert.executeAndReturnKey(film.toMap()).longValue();
-        saveGenre(film, id);
-        return id;
+        film.setId(id);
+        saveGenre(film);
+        return film;
     }
 
     @Override
@@ -41,7 +43,7 @@ public class FilmDbStorage implements FilmStorage {
         if (row == 0) {
             throw new NotFoundException("Фильм с id: " + film.getId() + "не был найден.");
         }
-        updateGenre(film);
+        saveGenre(film);
         return getFilm(film.getId());
     }
 
@@ -125,31 +127,30 @@ public class FilmDbStorage implements FilmStorage {
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
         film.setRate(rs.getInt("rate"));
-        int mpaId = rs.getInt("mpa_id");
+         int mpaId = rs.getInt("mpa_id");
         Mpa mpaRating = getMpaRating(mpaId);
         film.setMpa(mpaRating);
         film.setGenres(getGenres(rs.getLong("film_id")));
         return film;
     }
 
-    private void saveGenre(Film film, long filmId) {
-        if (film.getGenres() != null) {
-            film.getGenres().stream().
-                    map(FilmGenre::getId).
-                    collect(Collectors.toSet()).
-                    forEach(id -> jdbcTemplate.update("INSERT INTO GENRE_FILM(genre_id,film_id) VALUES (?,?)",
-                            id, filmId));
+    private void saveGenre(Film film) {
+        jdbcTemplate.update("DELETE GENRE_FILM WHERE film_id=?", film.getId());
+        if (film.getGenres() == null || film.getGenres().isEmpty()) {
+            return;
         }
-    }
+        final Set<FilmGenre> genres = new HashSet<>(film.getGenres());
+        final ArrayList<FilmGenre> genres1 = new ArrayList<>(genres);
+        jdbcTemplate.batchUpdate("INSERT INTO GENRE_FILM(genre_id,film_id) VALUES (?,?)",
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, genres1.get(i).getId());
+                        ps.setLong(2, film.getId());
+                    }
 
-    private void updateGenre(Film film) {
-        if (film.getGenres() != null) {
-            jdbcTemplate.update("DELETE GENRE_FILM WHERE film_id=?", film.getId());
-            film.getGenres().stream().
-                    map(FilmGenre::getId).
-                    collect(Collectors.toSet()).
-                    forEach(id -> jdbcTemplate.update("INSERT INTO GENRE_FILM(genre_id,film_id) VALUES (?,?)",
-                            id, film.getId()));
-        }
+                    public int getBatchSize() {
+                        return genres1.size();
+                    }
+                });
     }
 }

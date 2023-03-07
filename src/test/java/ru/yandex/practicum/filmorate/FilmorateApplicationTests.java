@@ -40,10 +40,10 @@ class FilmorateApplicationTests {
 
     @Test
     public void testUserDbStorage() {
-        long userId = userStorage.save(user);
-        Assertions.assertEquals(userId, 1L);
+        User user0 = userStorage.save(user);
+        Assertions.assertEquals(user0.getId(), 1L);
 
-        User user1 = userStorage.getUser(userId);
+        User user1 = userStorage.getUser(user0.getId());
         assertThat(user1).hasFieldOrPropertyWithValue("id", 1L);
 
         user1.setName("bos");
@@ -56,13 +56,13 @@ class FilmorateApplicationTests {
         friend.setName("ttt");
         friend.setBirthday(LocalDate.of(1900, 8, 10));
 
-        long friendId = userStorage.save(friend);
-        userStorage.addFriend(userId, friendId);
-        Set<User> friends = userStorage.getListFriends(userId);
+        User friend0 = userStorage.save(friend);
+        userStorage.addFriend(user0.getId(), friend0.getId());
+        Set<User> friends = userStorage.getListFriends(user0.getId());
         Assertions.assertEquals(1, friends.size());
 
-        userStorage.deleteFriend(userId, friendId);
-        Set<User> friends1 = userStorage.getListFriends(userId);
+        userStorage.deleteFriend(user0.getId(), friend0.getId());
+        Set<User> friends1 = userStorage.getListFriends(user0.getId());
         Assertions.assertEquals(0, friends1.size());
 
         List<User> users = userStorage.getUsers();
@@ -84,17 +84,17 @@ class FilmorateApplicationTests {
         List<FilmGenre> filmGenres = List.of(filmGenre);
         film.setGenres(filmGenres);
 
-        long filmId = filmDbStorage.save(film);
-        Assertions.assertEquals(filmId, 1L);
+        Film film0 = filmDbStorage.save(film);
+        Assertions.assertEquals(film0.getId(), 1L);
 
-        long userId = userStorage.save(user);
-        filmDbStorage.addLikes(filmId, userId);
+        User user1 = userStorage.save(user);
+        filmDbStorage.addLikes(film0.getId(), user1.getId());
 
         Film film1 = filmDbStorage.getFilm(1L);
         assertThat(film1).hasFieldOrPropertyWithValue("id", 1L);
         assertThat(film1).hasFieldOrPropertyWithValue("rate", 1);
 
-        filmDbStorage.deleteLikes(filmId, userId);
+        filmDbStorage.deleteLikes(film0.getId(), user1.getId());
         Film film2 = filmDbStorage.getFilm(1L);
         assertThat(film2).hasFieldOrPropertyWithValue("rate", 0);
 

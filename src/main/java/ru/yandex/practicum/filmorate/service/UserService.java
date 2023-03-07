@@ -47,8 +47,7 @@ public class UserService extends AbstractService<User> {
 
     @Override
     public User save(User user, BindingResult result) {
-        long id = storageUser.save(super.save(user, result));
-        return storageUser.getUser(id);
+        return storageUser.save(super.save(user, result));
     }
 
     @Override

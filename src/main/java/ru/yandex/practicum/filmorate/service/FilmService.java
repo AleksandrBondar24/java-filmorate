@@ -43,8 +43,7 @@ public class FilmService extends AbstractService<Film> {
 
     @Override
     public Film save(Film film, BindingResult result) {
-        long id = storageFilm.save(super.save(film, result));
-        return storageFilm.getFilm(id);
+        return storageFilm.save(super.save(film, result));
     }
 
     @Override

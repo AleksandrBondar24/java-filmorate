@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface UserStorage {
-    long save(User user);
+    User save(User user);
 
     User update(User user);
 
