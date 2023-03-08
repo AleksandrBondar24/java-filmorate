@@ -13,57 +13,50 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService extends AbstractService<User> {
-    private final UserStorage storage;
+    private final UserStorage storageUser;
 
     @Override
-    public void add(Long idUser, Long friendId) {
-        super.add(idUser, friendId);
-        storage.getUser(idUser).getFriends().add(friendId);
-        storage.getUser(friendId).getFriends().add(idUser);
+    public void add(Long userId, Long friendId) {
+        super.add(userId, friendId);
+        storageUser.addFriend(userId, friendId);
     }
 
     @Override
-    public void delete(Long idUser, Long friendId) {
-        super.delete(idUser, friendId);
-        storage.getUser(idUser).getFriends().remove(friendId);
-        storage.getUser(friendId).getFriends().remove(idUser);
+    public void delete(Long userId, Long friendId) {
+        super.delete(userId, friendId);
+        storageUser.deleteFriend(userId, friendId);
     }
 
-
-    public List<User> getListFriends(Long id) {
-        super.validateId(id);
-        return storage.getUser(id).getFriends().stream().
-                map(storage::getUser).
-                collect(Collectors.toList());
+    public Set<User> getListFriends(Long userId) {
+        super.validateId(userId);
+        return storageUser.getListFriends(userId);
     }
 
-    public List<User> getMutualFriends(Long idUser, Long otherId) {
-        super.validateIds(idUser, otherId);
-        Set<Long> friends = storage.getUser(idUser).getFriends();
-        return storage.getUser(otherId).getFriends().stream().
+    public Set<User> getMutualFriends(Long userId, Long otherId) {
+        super.validateIds(userId, otherId);
+        Set<User> friends = storageUser.getListFriends(userId);
+        return storageUser.getListFriends(otherId).stream().
                 filter(friends::contains).
-                map(storage::getUser).
-                collect(Collectors.toList());
+                collect(Collectors.toSet());
     }
 
-    public User getUser(Long id) {
-        super.validateId(id);
-        return storage.getUser(id);
+    public User getUser(Long userId) {
+        super.validateId(userId);
+        return storageUser.getUser(userId);
     }
 
     @Override
     public User save(User user, BindingResult result) {
-        return storage.save(super.save(user, result));
+        return storageUser.save(super.save(user, result));
     }
 
     @Override
     public User update(User user) {
-        return storage.update(super.update(user));
+        return storageUser.update(user);
     }
 
-
     public List<User> getListAllUsers() {
-        return storage.getUsers();
+        return storageUser.getUsers();
     }
 
     @Override

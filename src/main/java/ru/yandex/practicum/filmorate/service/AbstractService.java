@@ -9,13 +9,10 @@ import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 import java.util.List;
 
 public abstract class AbstractService<T extends Model> {
-    private Long generatorId = 1L;
 
     public T save(T o, BindingResult result) {
         errorMessageBuilder(result);
         validate(o);
-        o.setId(generatorId);
-        generatorId++;
         return o;
     }
 
