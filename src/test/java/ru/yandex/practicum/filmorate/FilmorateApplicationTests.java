@@ -11,8 +11,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,8 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmorateApplicationTests {
 
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmDbStorage;
+    private final UserStorage userDbStorage;
+    private final FilmStorage filmDbStorage;
+    private final FilmGenreStorage filmGenreDbStorage;
+    private final MpaStorage mpaDbStorage;
     private User user;
 
     @BeforeEach
@@ -40,14 +44,14 @@ class FilmorateApplicationTests {
 
     @Test
     public void testUserDbStorage() {
-        User user0 = userStorage.save(user);
+        User user0 = userDbStorage.save(user);
         Assertions.assertEquals(user0.getId(), 1L);
 
-        User user1 = userStorage.getUser(user0.getId());
+        User user1 = userDbStorage.getUser(user0.getId());
         assertThat(user1).hasFieldOrPropertyWithValue("id", 1L);
 
         user1.setName("bos");
-        User user2 = userStorage.update(user1);
+        User user2 = userDbStorage.update(user1);
         assertThat(user2).hasFieldOrPropertyWithValue("name", "bos");
 
         User friend = new User();
@@ -56,16 +60,16 @@ class FilmorateApplicationTests {
         friend.setName("ttt");
         friend.setBirthday(LocalDate.of(1900, 8, 10));
 
-        User friend0 = userStorage.save(friend);
-        userStorage.addFriend(user0.getId(), friend0.getId());
-        Set<User> friends = userStorage.getListFriends(user0.getId());
+        User friend0 = userDbStorage.save(friend);
+        userDbStorage.addFriend(user0.getId(), friend0.getId());
+        Set<User> friends = userDbStorage.getListFriends(user0.getId());
         Assertions.assertEquals(1, friends.size());
 
-        userStorage.deleteFriend(user0.getId(), friend0.getId());
-        Set<User> friends1 = userStorage.getListFriends(user0.getId());
+        userDbStorage.deleteFriend(user0.getId(), friend0.getId());
+        Set<User> friends1 = userDbStorage.getListFriends(user0.getId());
         Assertions.assertEquals(0, friends1.size());
 
-        List<User> users = userStorage.getUsers();
+        List<User> users = userDbStorage.getUsers();
         Assertions.assertEquals(2, users.size());
     }
 
@@ -87,7 +91,7 @@ class FilmorateApplicationTests {
         Film film0 = filmDbStorage.save(film);
         Assertions.assertEquals(film0.getId(), 1L);
 
-        User user1 = userStorage.save(user);
+        User user1 = userDbStorage.save(user);
         filmDbStorage.addLikes(film0.getId(), user1.getId());
 
         Film film1 = filmDbStorage.getFilm(1L);
@@ -105,16 +109,16 @@ class FilmorateApplicationTests {
         List<Film> films = filmDbStorage.getFilms();
         Assertions.assertEquals(1, films.size());
 
-        List<FilmGenre> filmGenres1 = filmDbStorage.getFilmGenres();
+        List<FilmGenre> filmGenres1 = filmGenreDbStorage.getFilmGenres();
         Assertions.assertEquals(6, filmGenres1.size());
 
-        FilmGenre filmGenre1 = filmDbStorage.getFilmGenre(2);
+        FilmGenre filmGenre1 = filmGenreDbStorage.getFilmGenre(2);
         assertThat(filmGenre1).hasFieldOrPropertyWithValue("name", "Драма");
 
-        List<Mpa> mpaRatings = filmDbStorage.getMpaRatings();
+        List<Mpa> mpaRatings = mpaDbStorage.getMpaRatings();
         Assertions.assertEquals(5, mpaRatings.size());
 
-        Mpa mpa1 = filmDbStorage.getMpaRating(3);
+        Mpa mpa1 = mpaDbStorage.getMpaRating(3);
         assertThat(mpa1).hasFieldOrPropertyWithValue("name", "PG-13");
     }
 }

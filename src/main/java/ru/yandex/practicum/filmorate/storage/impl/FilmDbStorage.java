@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -9,12 +9,14 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.util.exception.NotFoundException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +39,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         int row = jdbcTemplate.
-                update("UPDATE FILM SET name=?, description=?, release_date=?, duration=?, rate=?, mpa_id=? WHERE film_id=?",
+                update("UPDATE FILM SET name=?, description=?, release_date=?, duration=?, rate=?, mpa_id=? " +
+                                "WHERE film_id=?",
                         film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(),
                         film.getId());
         if (row == 0) {
@@ -49,74 +52,103 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilms() {
-        return jdbcTemplate.query("SELECT * FROM FILM", ((rs, rowNum) -> filmMapper(rs)));
+        Map<Long, List<FilmGenre>> filmsGenres = new HashMap<>();
+        List<Film> films = jdbcTemplate.query("SELECT *,m.name_mpa " +
+                        "FROM FILM f " +
+                        "LEFT JOIN MPA m ON f.mpa_id = m.mpa_id",
+                ((rs, rowNum) -> filmMapper(rs)));
+        if (films.isEmpty()) {
+            return films;
+        }
+        jdbcTemplate.query("SELECT *,gf.film_id " +
+                        "FROM GENRE g " +
+                        "LEFT JOIN GENRE_FILM gf ON g.genre_id = gf.genre_id",
+                ((rs, rowNum) -> assignGenres(rs, films, filmsGenres)));
+        return films;
+    }
+
+    private List<Film> assignGenres(ResultSet rs, List<Film> films, Map<Long, List<FilmGenre>> filmsGenres) throws SQLException {
+        final long filmId = rs.getLong("film_id");
+        List<FilmGenre> listGenres = filmsGenres.getOrDefault(filmId, new ArrayList<>());
+        listGenres.add(genreMapper(rs));
+        filmsGenres.put(filmId, listGenres);
+        films.forEach(film -> film.setGenres(filmsGenres.getOrDefault(film.getId(), new ArrayList<>())));
+        return films;
+    }
+
+    private Film assignGenre(ResultSet rs, Film film, List<FilmGenre> filmGenres) throws SQLException {
+        filmGenres.add(genreMapper(rs));
+        film.setGenres(filmGenres);
+        return film;
     }
 
     @Override
     public Film getFilm(Long idFilm) {
-        return jdbcTemplate.query("SELECT * FROM FILM WHERE film_id=?",
+        List<FilmGenre> filmGenres = new ArrayList<>();
+        Film film = jdbcTemplate.query("SELECT *,m.name_mpa " +
+                                "FROM FILM f " +
+                                "LEFT JOIN MPA m ON f.mpa_id = m.mpa_id " +
+                                "WHERE film_id=?",
                         ((rs, rowNum) -> filmMapper(rs)), idFilm).stream().findAny().
                 orElseThrow(() -> new NotFoundException("Фильм с id: " + idFilm + " не был найден."));
+        jdbcTemplate.query("SELECT *,gf.film_id " +
+                        "FROM GENRE g " +
+                        "LEFT JOIN GENRE_FILM gf ON g.genre_id = gf.genre_id " +
+                        "WHERE film_id=?",
+                ((rs, rowNum) -> assignGenre(rs, film, filmGenres)), idFilm);
+        return film;
     }
 
     @Override
     public void addLikes(Long idFilm, Long userId) {
         jdbcTemplate.update("INSERT INTO LIKES_MOVIE(film_id,user_id) VALUES (?,?)", idFilm, userId);
-        jdbcTemplate.update("UPDATE FILM SET rate = rate + 1 WHERE film_id=?", idFilm);
+        jdbcTemplate.update("UPDATE FILM SET rate = rate + 1 " +
+                "WHERE film_id=?", idFilm);
     }
 
     @Override
     public void deleteLikes(Long idFilm, Long userId) {
-        jdbcTemplate.update("DELETE FROM LIKES_MOVIE WHERE film_id=? AND user_id=?", idFilm, userId);
-        jdbcTemplate.update("UPDATE FILM SET rate = rate - 1 WHERE film_id=?", idFilm);
+        jdbcTemplate.update("DELETE FROM LIKES_MOVIE " +
+                "WHERE film_id=? AND user_id=?", idFilm, userId);
+        jdbcTemplate.update("UPDATE FILM SET rate = rate - 1 " +
+                "WHERE film_id=?", idFilm);
     }
 
-    @Override
-    public List<FilmGenre> getFilmGenres() {
-        return jdbcTemplate.query("SELECT * FROM GENRE", ((rs, rowNum) -> genreMapper(rs)));
-    }
 
     @Override
-    public List<Mpa> getMpaRatings() {
-        return jdbcTemplate.query("SELECT * FROM MPA", ((rs, rowNum) -> mpaMapper(rs)));
-    }
-
-    @Override
-    public FilmGenre getFilmGenre(Integer genreId) {
-        return jdbcTemplate.query("SELECT * FROM GENRE WHERE genre_id=?",
-                        ((rs, rowNum) -> genreMapper(rs)), genreId).
-                stream().
-                findAny().
-                orElseThrow(() -> new NotFoundException("Жанр с id: " + genreId + "не был найден."));
-    }
-
-    @Override
-    public Mpa getMpaRating(Integer mpaId) {
-        return jdbcTemplate.query("SELECT * FROM MPA WHERE mpa_id=?",
-                        ((rs, rowNum) -> mpaMapper(rs)), mpaId).
-                stream().
-                findAny().
-                orElseThrow(() -> new NotFoundException("Рейтинг mpa с id: " + mpaId + "не был найден."));
+    public List<Film> getListFilmBest(Long count) {
+        Map<Long, List<FilmGenre>> filmsGenres = new HashMap<>();
+        List<Film> films = jdbcTemplate.query("SELECT *,m.name_mpa " +
+                        "FROM FILM f " +
+                        "LEFT JOIN MPA m ON f.mpa_id = m.mpa_id " +
+                        "ORDER BY rate DESC " +
+                        "LIMIT ? ",
+                ((rs, rowNum) -> filmMapper(rs)), count);
+        if (films.isEmpty()) {
+            return films;
+        }
+        String sql = "SELECT *,gf.film_id " +
+                "FROM GENRE g " +
+                "LEFT JOIN GENRE_FILM gf ON g.genre_id = gf.genre_id " +
+                "WHERE gf.film_id " +
+                "IN (" + films.stream().
+                map(film -> String.valueOf(film.getId())).collect(Collectors.joining(",")) + ")";
+        jdbcTemplate.query(sql, (rs, rowNum) -> assignGenres(rs, films, filmsGenres));
+        return films;
     }
 
     private Mpa mpaMapper(ResultSet rs) throws SQLException {
         Mpa mpaRating = new Mpa();
         mpaRating.setId(rs.getInt("mpa_id"));
-        mpaRating.setName(rs.getString("name"));
+        mpaRating.setName(rs.getString("name_mpa"));
         return mpaRating;
     }
 
     private FilmGenre genreMapper(ResultSet rs) throws SQLException {
         FilmGenre filmGenre = new FilmGenre();
         filmGenre.setId(rs.getInt("genre_id"));
-        filmGenre.setName(rs.getString("name"));
+        filmGenre.setName(rs.getString("name_genre"));
         return filmGenre;
-    }
-
-    private List<FilmGenre> getGenres(Long idFilm) {
-        return new ArrayList<>(jdbcTemplate.
-                query("SELECT * FROM GENRE WHERE genre_id IN (SELECT genre_id FROM GENRE_FILM WHERE film_id=?) ORDER BY genre_id",
-                        ((rs, rowNum) -> genreMapper(rs)), idFilm));
     }
 
     private Film filmMapper(ResultSet rs) throws SQLException {
@@ -127,10 +159,8 @@ public class FilmDbStorage implements FilmStorage {
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
         film.setRate(rs.getInt("rate"));
-         int mpaId = rs.getInt("mpa_id");
-        Mpa mpaRating = getMpaRating(mpaId);
+        Mpa mpaRating = mpaMapper(rs);
         film.setMpa(mpaRating);
-        film.setGenres(getGenres(rs.getLong("film_id")));
         return film;
     }
 

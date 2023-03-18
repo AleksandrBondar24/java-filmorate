@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ public class UserControllerTest {
     private UserStorage storage;
     private UserService service;
     private User user;
-    private JdbcTemplate jdbcTemplate = new JdbcTemplate();
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate();
     @BeforeEach
     public void createUserAndController() {
         storage = new UserDbStorage(jdbcTemplate);
