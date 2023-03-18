@@ -8,6 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class FilmGenre {
-    int id;
-    String name;
+    private int id;
+    private String name;
 }

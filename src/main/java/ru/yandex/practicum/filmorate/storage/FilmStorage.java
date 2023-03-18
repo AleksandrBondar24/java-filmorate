@@ -19,12 +19,5 @@ public interface FilmStorage {
     void addLikes(Long idFilm, Long userId);
 
     void deleteLikes(Long idFilm, Long userId);
-
-    List<FilmGenre> getFilmGenres();
-
-    List<Mpa> getMpaRatings();
-
-    FilmGenre getFilmGenre(Integer genreId);
-
-    Mpa getMpaRating(Integer mpaId);
+    List<Film> getListFilmBest(Long count);
 }

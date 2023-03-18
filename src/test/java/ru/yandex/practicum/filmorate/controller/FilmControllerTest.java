@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.impl.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.FilmGenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.MpaDbStorage;
 import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 
 import java.time.LocalDate;
@@ -23,11 +25,15 @@ public class FilmControllerTest {
     private FilmStorage storage;
     private FilmService service;
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
+    private  FilmGenreStorage storageGenre;
+    private  MpaStorage storageMpa;
 
     @BeforeEach
     public void createFilmAndController() {
         storage = new FilmDbStorage(jdbcTemplate);
-        service = new FilmService(storage);
+        storageGenre = new FilmGenreDbStorage(jdbcTemplate);
+        storageMpa = new MpaDbStorage(jdbcTemplate);
+        service = new FilmService(storage,storageGenre,storageMpa);
         controller = new FilmController(service);
         film = new Film();
         film.setName("Wither");

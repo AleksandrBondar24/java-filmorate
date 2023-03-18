@@ -6,19 +6,21 @@ import org.springframework.validation.BindingResult;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService extends AbstractService<Film> {
     public static final LocalDate data = LocalDate.of(1895, 12, 28);
     private final FilmStorage storageFilm;
+    private final FilmGenreStorage storageGenre;
+    private final MpaStorage storageMpa;
 
     @Override
     public void add(Long filmId, Long userId) {
@@ -34,11 +36,7 @@ public class FilmService extends AbstractService<Film> {
 
     public List<Film> getListFilmBest(Long count) {
         super.validateId(count);
-        return storageFilm.getFilms().stream().
-                sorted(Comparator.comparingInt(Film::getRate).
-                        reversed()).
-                limit(count).
-                collect(Collectors.toList());
+        return storageFilm.getListFilmBest(count);
     }
 
     @Override
@@ -68,19 +66,19 @@ public class FilmService extends AbstractService<Film> {
     }
 
     public List<FilmGenre> getFilmGenres() {
-        return storageFilm.getFilmGenres();
+        return storageGenre.getFilmGenres();
     }
 
     public FilmGenre getFilmGenre(Integer genreID) {
-        return storageFilm.getFilmGenre(genreID);
+        return storageGenre.getFilmGenre(genreID);
 
     }
 
     public List<Mpa> getMpaRatings() {
-        return storageFilm.getMpaRatings();
+        return storageMpa.getMpaRatings();
     }
 
     public Mpa getMpaRating(Integer mpaId) {
-        return storageFilm.getMpaRating(mpaId);
+        return storageMpa.getMpaRating(mpaId);
     }
 }
