@@ -12,9 +12,9 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
-@RequestMapping("/films")
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/films")
 public class FilmController {
     private final FilmService service;
 
@@ -47,13 +47,14 @@ public class FilmController {
     @GetMapping("/popular")
     protected List<Film> getList(@RequestParam(value = "count", defaultValue = "10", required = false) Long count) {
         log.debug("Получен список из " + count + " лучших фильмов.");
-        return service.getList(count);
+        return service.getListFilmBest(count);
     }
 
     @GetMapping
     public List<Film> getListModels() {
-        log.debug("Получен список фильмов: {} ", service.getListModels());
-        return service.getListModels();
+        List<Film> films = service.getListAllFilms();
+        log.debug("Получен список фильмов: {} ", films);
+        return films;
     }
 
     @GetMapping("/{id}")

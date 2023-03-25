@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Slf4j
@@ -19,22 +20,22 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user, BindingResult result) {
-        service.save(user, result);
-        log.debug("Добавлен пользователь: {}", user);
-        return user;
+        User user1 = service.save(user, result);
+        log.debug("Добавлен пользователь: {}", user1);
+        return user1;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        service.update(user);
-        log.debug("Обновлен пользователь: {}", user);
-        return user;
+        User user1 = service.update(user);
+        log.debug("Обновлен пользователь: {}", user1);
+        return user1;
     }
 
     @GetMapping
     public List<User> getListModels() {
-        log.debug("Получен список пользователей: {} ", service.getListModels());
-        return service.getListModels();
+        log.debug("Получен список пользователей: {} ", service.getListAllUsers());
+        return service.getListAllUsers();
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -50,13 +51,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    protected List<User> getList(@PathVariable Long id) {
+    protected Set<User> getList(@PathVariable Long id) {
         log.debug("Получен список друзей пользователя с идентификатором: " + id);
-        return service.getList(id);
+        return service.getListFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    protected List<User> getList(@PathVariable Long id, @PathVariable Long otherId) {
+    protected Set<User> getList(@PathVariable Long id, @PathVariable Long otherId) {
         log.debug("Получен список общих друзей пользователей с идентификаторами: " + id + " и " + otherId);
         return service.getMutualFriends(id, otherId);
     }
