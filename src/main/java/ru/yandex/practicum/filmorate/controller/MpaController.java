@@ -26,7 +26,7 @@ public class MpaController {
     }
 
     @GetMapping("/{id}")
-    public Mpa getMpaRating(@PathVariable Integer id) {
+    public Mpa getMpaRating(@PathVariable Long id) {
         Mpa mpaRating = service.getMpaRating(id);
         log.debug("Получен MPA рейтинг с идентификатором: {} ", id);
         return mpaRating;

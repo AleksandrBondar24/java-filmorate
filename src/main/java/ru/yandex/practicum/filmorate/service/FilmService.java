@@ -3,12 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.util.enums.EventType;
+import ru.yandex.practicum.filmorate.util.enums.Operation;
 import ru.yandex.practicum.filmorate.util.exception.ValidationException;
 
 import java.time.LocalDate;
@@ -18,44 +19,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmService extends AbstractService<Film> {
     public static final LocalDate data = LocalDate.of(1895, 12, 28);
-    private final FilmStorage storageFilm;
-    private final FilmGenreStorage storageGenre;
-    private final MpaStorage storageMpa;
+    private final FilmStorage filmStorage;
+    private final FilmGenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
+    private final DirectorStorage directorStorage;
+    private final FeedStorage feedStorage;
 
     @Override
     public void add(Long filmId, Long userId) {
         super.add(filmId, userId);
-        storageFilm.addLikes(filmId, userId);
+        filmStorage.addLikes(filmId, userId);
+        feedStorage.saveFeed(userId, EventType.LIKE, Operation.ADD, filmId);
     }
 
     @Override
     public void delete(Long filmId, Long userId) {
         super.delete(filmId, userId);
-        storageFilm.deleteLikes(filmId, userId);
+        filmStorage.deleteLikes(filmId, userId);
+        feedStorage.saveFeed(userId, EventType.LIKE, Operation.REMOVE, filmId);
     }
 
     public List<Film> getListFilmBest(Long count) {
         super.validateId(count);
-        return storageFilm.getListFilmBest(count);
+        return filmStorage.getListFilmBest(count);
     }
 
     @Override
     public Film save(Film film, BindingResult result) {
-        return storageFilm.save(super.save(film, result));
+        return filmStorage.save(super.save(film, result));
     }
 
     @Override
     public Film update(Film film) {
-        return storageFilm.update(film);
+        return filmStorage.update(film);
     }
 
     public List<Film> getListAllFilms() {
-        return storageFilm.getFilms();
+        return filmStorage.getFilms();
     }
 
     public Film getFilm(Long filmID) {
         super.validateId(filmID);
-        return storageFilm.getFilm(filmID);
+        return filmStorage.getFilm(filmID);
     }
 
     @Override
@@ -66,19 +71,39 @@ public class FilmService extends AbstractService<Film> {
     }
 
     public List<FilmGenre> getFilmGenres() {
-        return storageGenre.getFilmGenres();
+        return genreStorage.getFilmGenres();
     }
 
-    public FilmGenre getFilmGenre(Integer genreID) {
-        return storageGenre.getFilmGenre(genreID);
+    public FilmGenre getFilmGenre(Long genreID) {
+        return genreStorage.getFilmGenre(genreID);
 
     }
 
     public List<Mpa> getMpaRatings() {
-        return storageMpa.getMpaRatings();
+        return mpaStorage.getMpaRatings();
     }
 
-    public Mpa getMpaRating(Integer mpaId) {
-        return storageMpa.getMpaRating(mpaId);
+    public Mpa getMpaRating(Long mpaId) {
+        return mpaStorage.getMpaRating(mpaId);
+    }
+
+    public void deleteFilm(Long filmId) {
+        filmStorage.deleteFilm(filmId);
+    }
+
+    public List<Film> searchFilms(String query, String by) {
+        return filmStorage.searchFilms(query, by);
+    }
+
+    public List<Film> getFilmByDirector(Long directorId, String sortBy) {
+        Director director = directorStorage.getDirectorById(directorId);
+        if (sortBy.equals("year")) {
+            return filmStorage.getFilmByDirectorByYear(director, sortBy);
+        }
+        return filmStorage.getFilmByDirectorByLikes(director, sortBy);
+    }
+
+    public List<Film> getRecommendation(Long id) {
+        return filmStorage.getRecommendation(id);
     }
 }

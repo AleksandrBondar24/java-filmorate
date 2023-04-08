@@ -6,8 +6,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class Mpa {
-    private int id;
+@EqualsAndHashCode(callSuper = true)
+public class Mpa extends Model {
     private String name;
 }

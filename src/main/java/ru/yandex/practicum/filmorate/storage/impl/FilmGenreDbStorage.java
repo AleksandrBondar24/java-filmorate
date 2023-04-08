@@ -23,7 +23,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
 
 
     @Override
-    public FilmGenre getFilmGenre(Integer genreId) {
+    public FilmGenre getFilmGenre(Long genreId) {
         return jdbcTemplate.query("SELECT * FROM GENRE WHERE genre_id=?",
                         ((rs, rowNum) -> genreMapper(rs)), genreId).
                 stream().
@@ -32,7 +32,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
     private FilmGenre genreMapper(ResultSet rs) throws SQLException {
         FilmGenre filmGenre = new FilmGenre();
-        filmGenre.setId(rs.getInt("genre_id"));
+        filmGenre.setId(rs.getLong("genre_id"));
         filmGenre.setName(rs.getString("name_genre"));
         return filmGenre;
     }

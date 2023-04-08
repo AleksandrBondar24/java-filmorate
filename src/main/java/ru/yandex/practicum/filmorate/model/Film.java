@@ -1,15 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 @Setter
@@ -25,9 +23,11 @@ public class Film extends Model {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+    @JsonIgnore
     private int rate;
     private Mpa mpa;
     private List<FilmGenre> genres = new ArrayList<>();
+    private Set<Director> directors = new HashSet<>();
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();

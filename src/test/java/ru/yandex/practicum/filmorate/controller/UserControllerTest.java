@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 
 public class UserControllerTest {
     private UserController controller;
+    private FilmService filmService;
     private UserStorage storage;
     private UserService service;
     private User user;
@@ -21,7 +23,8 @@ public class UserControllerTest {
     public void createUserAndController() {
         storage = new UserDbStorage(jdbcTemplate);
         service = new UserService(storage);
-        controller = new UserController(service);
+        filmService = new FilmService()
+        controller = new UserController(service,filmService);
         user = new User();
         user.setEmail("alex@yandex.ru");
         user.setLogin("beglets");

@@ -6,8 +6,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class FilmGenre {
-    private int id;
+@EqualsAndHashCode(callSuper = true)
+public class FilmGenre extends Model {
     private String name;
 }

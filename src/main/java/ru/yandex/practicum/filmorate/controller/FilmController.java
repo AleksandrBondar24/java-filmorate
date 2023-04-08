@@ -63,6 +63,28 @@ public class FilmController {
         log.debug("Получен фильм с идентификатором: " + id);
         return film;
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable Long id) {
+        service.deleteFilm(id);
+        log.info("Фильм с идентификатором: " + id + " удален.");
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam(value = "query") String query,
+                                  @RequestParam(value = "by", defaultValue = "title", required = false) String by) {
+        List<Film> search = service.searchFilms(query, by);
+        log.info("Поиск фильма");
+        return search;
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmByDirector(@PathVariable Long directorId, @RequestParam(value = "sortBy",
+            defaultValue = "likes", required = false) String sortBy) {
+        List<Film> filmsDirector = service.getFilmByDirector(directorId, sortBy);
+        log.debug("Получен список фильмов режиссера с идентификатором: {} ", directorId);
+        return filmsDirector;
+    }
 }
 
 

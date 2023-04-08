@@ -17,7 +17,7 @@ import java.util.List;
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
     @Override
-    public Mpa getMpaRating(Integer mpaId) {
+    public Mpa getMpaRating(Long mpaId) {
         return jdbcTemplate.query("SELECT * FROM MPA WHERE mpa_id=?",
                         ((rs, rowNum) -> mpaMapper(rs)), mpaId).
                 stream().
@@ -30,7 +30,7 @@ public class MpaDbStorage implements MpaStorage {
     }
     private Mpa mpaMapper(ResultSet rs) throws SQLException {
         Mpa mpaRating = new Mpa();
-        mpaRating.setId(rs.getInt("mpa_id"));
+        mpaRating.setId(rs.getLong("mpa_id"));
         mpaRating.setName(rs.getString("name_mpa"));
         return mpaRating;
     }

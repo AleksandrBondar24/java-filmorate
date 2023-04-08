@@ -7,5 +7,5 @@ import java.util.List;
 public interface FilmGenreStorage {
     List<FilmGenre> getFilmGenres();
 
-    FilmGenre getFilmGenre(Integer genreId);
+    FilmGenre getFilmGenre(Long genreId);
 }

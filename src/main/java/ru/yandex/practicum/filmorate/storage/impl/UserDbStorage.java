@@ -58,6 +58,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Set<User> getListFriends(Long userId) {
+        getUser(userId);
         return new HashSet<>(jdbcTemplate.
                 query("SELECT * FROM USERS WHERE user_id IN(SELECT friend_id FROM USER_FRIEND WHERE user_id=?)",
                         ((rs, rowNum) -> userMapper(rs)), userId));
@@ -71,6 +72,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteFriend(Long userId, Long friendId) {
         jdbcTemplate.update("DELETE FROM USER_FRIEND WHERE user_id=? AND friend_id=?", userId, friendId);
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", userId);
     }
 
     private User userMapper(ResultSet rs) throws SQLException {
